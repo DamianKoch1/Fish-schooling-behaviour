@@ -44,6 +44,22 @@ public class Fish : MonoBehaviour
         separateDir = Vector3.zero;
     }
 
+    public void RandomizeStats(float randomness = 0.1f)
+    {
+        if (randomness <= 0) return;
+        perceptionRadius    *= Random.Range(1 - randomness, 1 + randomness);
+        maxPerceptionAngle  *= Random.Range(1 - randomness, 1 + randomness);
+        separationRadius    *= Random.Range(1 - randomness, 1 + randomness);
+        minSpeed            *= Random.Range(1 - randomness, 1 + randomness);
+        maxSpeed            *= Random.Range(1 - randomness, 1 + randomness);
+    }
+
+    public void RandomizeScale(float randomness = 0.1f)
+    {
+        if (randomness <= 0) return;
+        transform.localScale *= Random.Range(1 - randomness, 1 + randomness);
+    }
+
     private void Update()
     {
         UpdateAcceleration();
@@ -204,6 +220,8 @@ public class Fish : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
+        if (!UnityEditor.Selection.Contains(gameObject)) return;
+
         var pos = transform.position;
 
         Gizmos.color = Color.blue;

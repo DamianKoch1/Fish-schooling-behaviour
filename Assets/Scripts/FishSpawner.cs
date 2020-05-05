@@ -10,16 +10,22 @@ public class FishSpawner : MonoBehaviour
     [SerializeField]
     private float spawnRadius;
 
-    [SerializeField, Range(0, 200)]
+    [SerializeField, Range(0, MAX_SPAWN_COUNT)]
     private int initialSpawns;
 
     [SerializeField, Range(0, 10)]
     private float spawnRate;
 
-    [SerializeField]
-    private int maxSpawnCount;
+    [SerializeField, Range(0, 0.9f)]
+    private float behaviourRandomness = 0;
+
+    [SerializeField, Range(0, 0.9f)]
+    private float scaleRandomness = 0;
 
     public List<Fish> spawnedFish;
+
+    public const int MAX_SPAWN_COUNT = 300;
+
 
     private void Start()
     {
@@ -36,7 +42,7 @@ public class FishSpawner : MonoBehaviour
     {
         for (int i = 0; i < initialSpawns; i++)
         {
-            if (i >= maxSpawnCount) break;
+            if (i >= MAX_SPAWN_COUNT) break;
             SpawnFish();
         }
     }
@@ -48,7 +54,7 @@ public class FishSpawner : MonoBehaviour
 
     private void UpdateSpawnTimer()
     {
-        if (spawnedFish.Count > maxSpawnCount) return;
+        if (spawnedFish.Count > MAX_SPAWN_COUNT) return;
         if (spawnRate == 0) return;
         for (int i = 0; i < spawnRate * Time.deltaTime; i++)
         {
@@ -59,12 +65,14 @@ public class FishSpawner : MonoBehaviour
     private void SpawnFish()
     {
         var fish = Instantiate(fishPrefab.gameObject, Random.insideUnitSphere * spawnRadius, Random.rotation, transform).GetComponent<Fish>();
-        spawnedFish.Add(fish);
         fish.Initialize(this);
+        fish.RandomizeStats(behaviourRandomness);
+        fish.RandomizeScale(scaleRandomness);
+        spawnedFish.Add(fish);
     }
 
   
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red - new Color(0, 0, 0, 0.7f);
         Gizmos.DrawSphere(transform.position, spawnRadius);
