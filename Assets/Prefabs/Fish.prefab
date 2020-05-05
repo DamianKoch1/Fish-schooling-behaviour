@@ -57,7 +57,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: dde486d526ab11440be2567d159f7c3c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -87,9 +87,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4639681583225630578}
   - component: {fileID: 1641307163}
-  - component: {fileID: 607129048343932141}
   - component: {fileID: 4639681583225630589}
-  - component: {fileID: 106617501920286777}
   m_Layer: 8
   m_Name: Fish
   m_TagString: Untagged
@@ -109,6 +107,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4639681582426362671}
+  - {fileID: 210834472166210627}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 90.00001, z: 0}
@@ -125,31 +124,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   flockingSettings: {fileID: 11400000, guid: 6a645c5ecf60aaf41aba6a29327e19c7, type: 2}
-  perceptionRadius: 2.5
-  maxPerceptionAngle: 160
+  perceptionRadius: 3
+  maxPerceptionAngle: 140
   separationRadius: 1
-  avoidanceRange: 5
+  avoidanceRange: 4
   minSpeed: 5
-  maxSpeed: 8
+  maxSpeed: 10
   cohesionColor: {r: 0, g: 1, b: 0, a: 1}
   alignmentColor: {r: 0.53940105, g: 0, b: 1, a: 1}
   separationColor: {r: 1, g: 0, b: 0, a: 1}
---- !u!54 &607129048343932141
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4639681583225630588}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!136 &4639681583225630589
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -164,16 +147,80 @@ CapsuleCollider:
   m_Height: 0.6
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
---- !u!135 &106617501920286777
-SphereCollider:
+--- !u!1 &5518921460426730990
+GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4639681583225630588}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 210834472166210627}
+  - component: {fileID: 3320176941566805991}
+  - component: {fileID: 3731592534172026941}
+  m_Layer: 0
+  m_Name: Capsule (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &210834472166210627
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5518921460426730990}
+  m_LocalRotation: {x: 0.00000008940696, y: -0, z: 0.70710665, w: 0.707107}
+  m_LocalPosition: {x: -0, y: 0.06, z: 0.219}
+  m_LocalScale: {x: 0.07377348, y: 0.07852449, z: 0.07377348}
+  m_Children: []
+  m_Father: {fileID: 4639681583225630578}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90.00001}
+--- !u!33 &3320176941566805991
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5518921460426730990}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &3731592534172026941
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5518921460426730990}
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 2.5
-  m_Center: {x: 0, y: 0, z: 0}
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 6941807bd4987a646b0bb4b2d0d3c1aa, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0

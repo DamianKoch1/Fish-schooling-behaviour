@@ -18,5 +18,5 @@ MonoBehaviour:
   alignStrength: 1.57
   separateStrength: 3
   cohereStrength: 1.04
-  avoidanceStrength: 15
+  avoidanceStrength: 20
   maxSteerForce: 10

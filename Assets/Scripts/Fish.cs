@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(SphereCollider))]
 public class Fish : MonoBehaviour
 {
-    private List<Fish> flockmates;
-
     [SerializeField]
     private FlockingSettings flockingSettings;
 
@@ -23,8 +20,6 @@ public class Fish : MonoBehaviour
 
     public float maxSpeed;
 
-    private Rigidbody rb;
-
     private Vector3 cohereDir;
     private Vector3 alignDir;
     private Vector3 separateDir;
@@ -36,104 +31,101 @@ public class Fish : MonoBehaviour
     public Color alignmentColor;
     public Color separationColor;
 
+    private FishSpawner spawner;
 
-    private void Start()
-    {
-        Initialize();
-        GetComponent<SphereCollider>().isTrigger = true;
-    }
 
-    public void Initialize()
+
+    public void Initialize(FishSpawner _spawner)
     {
-        flockmates = new List<Fish>();
-        rb = GetComponent<Rigidbody>();
-        rb.velocity = transform.forward * Random.Range(minSpeed, maxSpeed);
+        spawner = _spawner;
+        velocity = transform.forward * Random.Range(minSpeed, maxSpeed);
         cohereDir = Vector3.zero;
         alignDir = Vector3.zero;
         separateDir = Vector3.zero;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         UpdateAcceleration();
 
         UpdateVelocity();
 
         Move();
-
-        transform.forward = velocity.normalized;
     }
 
     private void UpdateAcceleration()
     {
         acceleration = Vector3.zero;
 
-        if (flockmates.Count > 0)
+        if (spawner.spawnedFish.Count > 0)
         {
-            Vector3 flockCenter = Vector3.zero;
-            int perceivedFlockmateCount = 0;
-            int flockmatesToAvoidCount = 0;
-            foreach (var fish in flockmates)
-            {
-                if (!CanSeeFlockmate(fish)) continue;
-
-                perceivedFlockmateCount++;
-                flockCenter += fish.rb.position;
-
-                alignDir += fish.rb.velocity;
-
-                if (Vector3.Distance(rb.position, fish.rb.position) <= separationRadius)
-                {
-                    flockmatesToAvoidCount++;
-                    separateDir += rb.position - fish.rb.position;
-                }
-            }
-            if (perceivedFlockmateCount > 0)
-            {
-                flockCenter /= perceivedFlockmateCount;
-                alignDir /= perceivedFlockmateCount;
-            }
-            else
-            {
-                flockCenter = transform.position;
-                alignDir = Vector3.zero;
-            }
-
-            if (flockmatesToAvoidCount > 0)
-            {
-                separateDir /= flockmatesToAvoidCount;
-            }
-            else
-            {
-                separateDir = Vector3.zero;
-            }
-
-            cohereDir = flockCenter - transform.position;
-
-            var cohereForce = GetSteerForce(cohereDir);
-            var alignForce = GetSteerForce(alignDir);
-            var separateForce = GetSteerForce(separateDir);
-
-            acceleration += cohereForce * flockingSettings.cohereStrength;
-            acceleration += alignForce * flockingSettings.alignStrength;
-            acceleration += separateForce * flockingSettings.separateStrength;
+            FlockingBehaviour();
         }
 
         AvoidCollisions();
+    }
+
+    private void FlockingBehaviour()
+    {
+        Vector3 flockCenter = Vector3.zero;
+        int perceivedFlockmateCount = 0;
+        int flockmatesToAvoidCount = 0;
+        foreach (var fish in spawner.spawnedFish)
+        {
+            if (!IsFlockmate(fish)) continue;
+
+            perceivedFlockmateCount++;
+            flockCenter += fish.transform.position;
+
+            alignDir += fish.velocity;
+
+            if (Vector3.Distance(transform.position, fish.transform.position) <= separationRadius)
+            {
+                flockmatesToAvoidCount++;
+                separateDir += transform.position - fish.transform.position;
+            }
+        }
+        if (perceivedFlockmateCount > 0)
+        {
+            flockCenter /= perceivedFlockmateCount;
+            alignDir /= perceivedFlockmateCount;
+        }
+        else
+        {
+            flockCenter = transform.position;
+            alignDir = Vector3.zero;
+        }
+
+        if (flockmatesToAvoidCount > 0)
+        {
+            separateDir /= flockmatesToAvoidCount;
+        }
+        else
+        {
+            separateDir = Vector3.zero;
+        }
+
+        cohereDir = flockCenter - transform.position;
+
+        var cohereForce = GetSteerForce(cohereDir);
+        var alignForce = GetSteerForce(alignDir);
+        var separateForce = GetSteerForce(separateDir);
+
+        acceleration += cohereForce * flockingSettings.cohereStrength;
+        acceleration += alignForce * flockingSettings.alignStrength;
+        acceleration += separateForce * flockingSettings.separateStrength;
     }
 
     private void AvoidCollisions()
     {
         if (!IsApproachingObstacle()) return;
         var avoidanceDir = GetClearDir();
-        print(avoidanceDir);
         acceleration += GetSteerForce(avoidanceDir) * flockingSettings.avoidanceStrength;
     }
 
     private void UpdateVelocity()
     {
-        velocity = rb.velocity;
-        velocity += acceleration * Time.fixedDeltaTime;
+        velocity += acceleration * Time.deltaTime;
         if (velocity.sqrMagnitude < minSpeed * minSpeed)
         {
             velocity = velocity.normalized * minSpeed;
@@ -146,53 +138,33 @@ public class Fish : MonoBehaviour
 
     private void Move()
     {
-        rb.velocity = velocity;
+        if (velocity == Vector3.zero) return;
+        transform.position += velocity * Time.deltaTime;
+        transform.forward = velocity.normalized;
     }
 
-
-    private void OnValidate()
+    private bool IsFlockmate(Fish fish)
     {
-        GetComponent<SphereCollider>().radius = perceptionRadius;
-    }
-
-    private bool CanSeeFlockmate(Fish flockmate)
-    {
-        if (!flockmates.Contains(flockmate)) return false;
-        return Vector3.Angle(transform.forward, flockmate.rb.position - rb.position) <= maxPerceptionAngle;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.isTrigger) return;
-        var fish = other.GetComponent<Fish>();
-        if (!fish) return;
-        if (flockmates.Contains(fish)) return;
-        flockmates.Add(fish);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.isTrigger) return;
-        var fish = other.GetComponent<Fish>();
-        if (!fish) return;
-        if (!flockmates.Contains(fish)) return;
-        flockmates.Remove(fish);
+        if (fish == this) return false;
+        if (Vector3.Distance(transform.position, fish.transform.position) > perceptionRadius) return false;
+        return Vector3.Angle(transform.forward, fish.transform.position - transform.position) <= maxPerceptionAngle;
     }
 
     private bool IsApproachingObstacle()
     {
-        return Physics.Raycast(rb.position, transform.forward, out var hit, avoidanceRange, flockingSettings.obstacleLayer);
+        return Physics.Raycast(transform.position, transform.forward, out var hit, avoidanceRange, flockingSettings.obstacleLayer);
     }
 
     private Vector3 GetClearDir()
     {
-        float angleStep = 30 * Mathf.Deg2Rad;
-        Ray ray = new Ray(rb.position, Vector3.zero);
+        float angleStep = 15 * Mathf.Deg2Rad;
+        Ray ray = new Ray(transform.position, Vector3.zero);
 
         for (float curAngle = angleStep; curAngle <= 360; curAngle += angleStep)
         {
             var forward = transform.forward * Mathf.Cos(curAngle);
             var right = transform.right * Mathf.Sin(curAngle);
+            var up = transform.up * Mathf.Sin(curAngle);
 
             ray.direction = forward + right;
             if (!Physics.Raycast(ray, avoidanceRange, flockingSettings.obstacleLayer))
@@ -206,30 +178,43 @@ public class Fish : MonoBehaviour
                 return ray.direction;
             }
 
+            ray.direction = forward + up;
+            if (!Physics.Raycast(ray, avoidanceRange, flockingSettings.obstacleLayer))
+            {
+                return ray.direction;
+            }
+
+            ray.direction = forward - up;
+            if (!Physics.Raycast(ray, avoidanceRange, flockingSettings.obstacleLayer))
+            {
+                return ray.direction;
+            }
+
             curAngle += angleStep;
         }
-        return transform.forward;
+        return -transform.forward;
     }
 
     private Vector3 GetSteerForce(Vector3 dir)
     {
-        var force = dir.normalized * maxSpeed - rb.velocity;
+        var force = dir.normalized * maxSpeed - velocity;
         return Vector3.ClampMagnitude(force, flockingSettings.maxSteerForce);
     }
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        var pos = rb.position;
+        var pos = transform.position;
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(pos, perceptionRadius);
 
-        if (flockmates != null)
+        if (spawner != null)
         {
-            foreach (var fish in flockmates)
+            foreach (var fish in spawner.spawnedFish)
             {
-                Gizmos.DrawLine(pos, fish.rb.position);
+                if (!IsFlockmate(fish)) continue;
+                Gizmos.DrawLine(pos, fish.transform.position);
             }
         }
 

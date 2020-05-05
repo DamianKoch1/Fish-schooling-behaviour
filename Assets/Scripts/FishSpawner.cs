@@ -19,7 +19,7 @@ public class FishSpawner : MonoBehaviour
     [SerializeField]
     private int maxSpawnCount;
 
-    private List<Fish> spawnedFish;
+    public List<Fish> spawnedFish;
 
     private void Start()
     {
@@ -58,8 +58,9 @@ public class FishSpawner : MonoBehaviour
 
     private void SpawnFish()
     {
-        var fish = Instantiate(fishPrefab.gameObject, Random.insideUnitSphere * spawnRadius, Random.rotation);
-        spawnedFish.Add(fish.GetComponent<Fish>());
+        var fish = Instantiate(fishPrefab.gameObject, Random.insideUnitSphere * spawnRadius, Random.rotation, transform).GetComponent<Fish>();
+        spawnedFish.Add(fish);
+        fish.Initialize(this);
     }
 
   
