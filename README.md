@@ -1,4 +1,4 @@
-# Fish-schooling-behaviour
+# Fish schooling behaviour
 Contains schooling fish based on Craig Reynolds Boids model.
 
 ![thumbnail](/Images/thumbnail.png)
